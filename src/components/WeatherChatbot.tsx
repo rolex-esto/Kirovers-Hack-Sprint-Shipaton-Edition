@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { MessageCircleIcon, XIcon, SendIcon, BotIcon, UserIcon } from './Icons';
 import './WeatherChatbot.css';
 
 // Region coordinates for direct API fetching
@@ -915,7 +916,10 @@ const SUGGESTIONS = [
 export function WeatherChatbot({ selectedRegion }: { selectedRegion: string }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'bot', text: `${getGreeting()} Ako si Kuya Weather! 🌤️\n\nTanungin mo ko tungkol sa:\n\n☀️ Current weather\n📅 7-day forecast\n🌧️ Rain analysis\n🌊 Flood risk\n🌡️ Heat index\n🚗 Travel safety\n⚔️ Compare regions\n\nType ka lang, tol!` },
+    {
+      role: 'bot',
+      text: `${getGreeting()} Ako si Kuya Weather — your everyday Philippine weather decision assistant.\n\nSubukan magtanong tungkol sa:\n• **Current weather & Heat Index** sa inyong lugar\n• **7-Day Rain & Thunderstorm** forecast\n• **Travel Safety & Flood Risk** advisory\n• **Side-by-Side Comparison** ng dalawang probinsya/cities\n\nType ka lang ng tanong sa baba, tol!`,
+    },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -939,7 +943,7 @@ export function WeatherChatbot({ selectedRegion }: { selectedRegion: string }) {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: 'bot', text: 'Ay naku, may error! Try mo ulit, tol. Baka nag-iinit lang ang server.' },
+        { role: 'bot', text: 'Ay naku, may error sa pag-connect! Try mo ulit, tol.' },
       ]);
     } finally {
       setLoading(false);
@@ -955,30 +959,46 @@ export function WeatherChatbot({ selectedRegion }: { selectedRegion: string }) {
         title="Kuya Weather Chatbot"
       >
         {open ? (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
+          <XIcon size={24} color="white" />
         ) : (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
+          <MessageCircleIcon size={24} color="white" />
         )}
       </button>
 
       {open && (
-        <div className="chatbot-panel" role="dialog" aria-label="Weather Chatbot">
+        <div className="chatbot-panel" role="dialog" aria-label="Kuya Weather Assistant">
           <div className="chatbot-header">
-            <div>
-              <h3>Kuya Weather</h3>
-              <span>Live data • Multi-signal analysis</span>
+            <div className="chatbot-header-branding">
+              <div className="chatbot-avatar" aria-hidden="true">
+                <BotIcon size={18} color="white" />
+                <span className="chatbot-status-dot" />
+              </div>
+              <div>
+                <h3 className="chatbot-title">Kuya Weather</h3>
+                <span className="chatbot-subtitle">Live Meteorological Intelligence</span>
+              </div>
             </div>
-            <button className="chatbot-close" onClick={() => setOpen(false)} aria-label="Close">×</button>
+            <button className="chatbot-close" onClick={() => setOpen(false)} aria-label="Close chatbot">
+              <XIcon size={18} color="currentColor" />
+            </button>
           </div>
 
-          <div className="chatbot-messages">
+          <div className="chatbot-messages" role="log" aria-live="polite">
             {messages.map((msg, i) => (
               <div key={i} className={`chatbot-msg ${msg.role}`}>
-                {msg.role === 'bot' && <div className="msg-label">Kuya Weather</div>}
+                <div className="msg-label" aria-hidden="true">
+                  {msg.role === 'bot' ? (
+                    <>
+                      <BotIcon size={13} color="var(--accent)" />
+                      <span>Kuya Weather</span>
+                    </>
+                  ) : (
+                    <>
+                      <UserIcon size={13} color="currentColor" />
+                      <span>You</span>
+                    </>
+                  )}
+                </div>
                 {msg.text.split('\n').map((line, j) => {
                   // Parse bold **text** into <strong> elements
                   const parts = line.split(/\*\*(.+?)\*\*/g);
@@ -1000,13 +1020,22 @@ export function WeatherChatbot({ selectedRegion }: { selectedRegion: string }) {
                 })}
               </div>
             ))}
-            {loading && <div className="chatbot-typing">Nag-a-analyze si Kuya Weather...</div>}
+            {loading && (
+              <div className="chatbot-typing">
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+                <span>Nag-a-analyze si Kuya Weather...</span>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
 
           <div className="chatbot-suggestions">
             {messages.length <= 2 && SUGGESTIONS.map((s, i) => (
-              <button key={i} onClick={() => handleSend(s)}>{s}</button>
+              <button key={i} onClick={() => handleSend(s)} type="button">
+                {s}
+              </button>
             ))}
           </div>
 
@@ -1016,12 +1045,18 @@ export function WeatherChatbot({ selectedRegion }: { selectedRegion: string }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Tanong ka lang, tol..."
+              placeholder="Tanong ka lang, tol... (e.g. Uulan ba sa Baguio?)"
               disabled={loading}
               aria-label="Type your weather question"
             />
-            <button onClick={() => handleSend()} disabled={loading || !input.trim()}>
-              Send
+            <button
+              onClick={() => handleSend()}
+              disabled={loading || !input.trim()}
+              type="button"
+              aria-label="Send message"
+            >
+              <SendIcon size={16} color="white" />
+              <span>Send</span>
             </button>
           </div>
         </div>

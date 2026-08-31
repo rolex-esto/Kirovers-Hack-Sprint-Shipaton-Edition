@@ -8,6 +8,8 @@ import { LocationDetect } from './LocationDetect';
 import { FavoriteRegions } from './FavoriteRegions';
 import { TyphoonBanner } from './TyphoonBanner';
 import { WeatherAlerts } from './WeatherAlerts';
+import { WeatherSignalPanel } from './WeatherSignalPanel';
+import { EvacuationPanel } from './EvacuationPanel';
 import { BestTimeToGo } from './BestTimeToGo';
 import { SmartRecommendations } from './SmartRecommendations';
 import { OptimizationPanel } from './OptimizationPanel';
@@ -149,8 +151,9 @@ export function Dashboard() {
     <div className="dashboard">
       <TyphoonBanner />
 
-      {/* Real-time weather alerts */}
+      {/* Real-time weather alerts & storm signals */}
       <WeatherAlerts windSpeed={maxWind} rainMm={maxRain} region={selectedRegion} />
+      <WeatherSignalPanel region={selectedRegion} cityCoords={cityCoords} />
 
       <div className="dashboard-search">
         <RegionSearch selected={selectedRegion} onSelect={handleRegionSelect} />
@@ -391,6 +394,17 @@ export function Dashboard() {
             </div>
             <p className="section-desc">Direct disaster & rescue numbers near {getRegionLabel(selectedRegion)}</p>
             <EmergencyHotlines region={selectedRegion} />
+          </div>
+
+          {/* Evacuation Centers — OSM nearby shelters */}
+          <div className="section-card">
+            <ErrorBoundary>
+              <EvacuationPanel
+                lat={cityCoords?.lat ?? regionCoords.lat}
+                lon={cityCoords?.lon ?? regionCoords.lon}
+                region={selectedCity || getRegionLabel(selectedRegion)}
+              />
+            </ErrorBoundary>
           </div>
         </section>
       </div>

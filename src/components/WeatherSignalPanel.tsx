@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useWeatherSignals } from '../hooks/useWeatherSignals';
+import { WindIcon, CloudRainIcon, ClockIcon, ShareIcon } from './Icons';
 import './WeatherSignalPanel.css';
 
 interface WeatherSignalPanelProps {
@@ -23,7 +24,7 @@ const RAINFALL_COLORS: Record<string, string> = {
   red: 'var(--signal-red, #ef4444)',
 };
 
-export default function WeatherSignalPanel({ region, cityCoords }: WeatherSignalPanelProps) {
+export function WeatherSignalPanel({ region, cityCoords }: WeatherSignalPanelProps) {
   const { loading, signal } = useWeatherSignals(region, cityCoords);
   const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle');
 
@@ -105,7 +106,7 @@ export default function WeatherSignalPanel({ region, cityCoords }: WeatherSignal
 
         {/* Max wind gust */}
         <div className="signal-detail" aria-label={`Maximum wind gust: ${signal.maxWindGust} kilometers per hour`}>
-          <span className="signal-detail__icon material-symbols-rounded" aria-hidden="true">air</span>
+          <WindIcon size={16} color="var(--accent)" className="signal-detail__icon" />
           <span className="signal-detail__text">
             Max gust: <strong>{signal.maxWindGust} km/h</strong>
           </span>
@@ -113,7 +114,7 @@ export default function WeatherSignalPanel({ region, cityCoords }: WeatherSignal
 
         {/* Max hourly rainfall */}
         <div className="signal-detail" aria-label={`Maximum hourly rainfall: ${signal.maxHourlyRain} millimeters`}>
-          <span className="signal-detail__icon material-symbols-rounded" aria-hidden="true">rainy</span>
+          <CloudRainIcon size={16} color="var(--accent)" className="signal-detail__icon" />
           <span className="signal-detail__text">
             Max rainfall: <strong>{signal.maxHourlyRain} mm/hr</strong>
           </span>
@@ -121,7 +122,7 @@ export default function WeatherSignalPanel({ region, cityCoords }: WeatherSignal
 
         {/* Valid until */}
         <div className="signal-detail signal-detail--muted" aria-label={`Valid until ${signal.validUntil}`}>
-          <span className="signal-detail__icon material-symbols-rounded" aria-hidden="true">schedule</span>
+          <ClockIcon size={16} color="var(--text-muted)" className="signal-detail__icon" />
           <span className="signal-detail__text">Valid until {signal.validUntil}</span>
         </div>
       </div>
@@ -133,15 +134,11 @@ export default function WeatherSignalPanel({ region, cityCoords }: WeatherSignal
         aria-label="Share weather warning"
         type="button"
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <circle cx="18" cy="5" r="3" />
-          <circle cx="6" cy="12" r="3" />
-          <circle cx="18" cy="19" r="3" />
-          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-        </svg>
+        <ShareIcon size={14} color="currentColor" />
         {shareStatus === 'copied' ? 'Copied!' : 'Share Warning'}
       </button>
     </section>
   );
 }
+
+export default WeatherSignalPanel;

@@ -1,68 +1,53 @@
-# Team Weather Lang — Philippines Weather Companion
+# Team Weather Lang — Philippine Weather Decision Companion
 
-A real-time Philippines weather dashboard that helps Filipinos decide whether to travel, plan activities, or stay indoors based on live weather data. Built with React + TypeScript and powered by Open-Meteo API and DuckDB-WASM for client-side data analysis.
+A real-time Philippine weather decision-support dashboard that empowers Filipinos to plan travel, evaluate daily commutes, monitor flood risks, locate evacuation shelters, and prepare for typhoons with confidence.
 
-**Live Demo:** [https://ph-rain-forecast.vercel.app](https://ph-rain-forecast.vercel.app)
-
----
-
-## Features
-
-### Core Dashboard
-- **Rain Heatmap** — Visual bubble map of the Philippines showing rainfall intensity per region
-- **7-Day Forecast** — Weekly weather summary with temperature, rain, and wind data
-- **Rain Charts** — Hourly and daily precipitation visualizations using Recharts
-- **Weather Alerts** — Automatic alerts for extreme heat, storms, and low visibility
-
-### Smart Tools
-- **Kuya Weather Chatbot** — AI-powered conversational weather assistant (Taglish)
-  - Ask about current weather, forecasts, travel safety, flood risk, heat index
-  - Supports natural language queries in Filipino and English
-  - Multi-signal analysis with emojis and structured output
-- **Trip Go Checker** — Should you travel? Get a safety verdict with transport-specific advice
-- **Transport Surge Predictor** — Predicts ride-hailing surge pricing based on weather conditions
-- **Region Comparison** — Compare weather between two Philippine regions side-by-side
-- **Activity Planner** — Best time recommendations for outdoor activities
-- **Historical Comparison** — Compare current weather against historical patterns
-
-### Quality of Life
-- **Dark Mode** — Full dark/light theme support
-- **Bilingual (EN/FIL)** — English and Filipino localization
-- **PWA / Offline** — Installable as a mobile app with offline caching
-- **Share Forecast** — Share weather forecasts with friends
-- **Favorites** — Save your frequently checked regions
-- **Geolocation** — Auto-detect your region
+**Live Application:** [https://kiroverse-hack-sprint-shipaton-edition.vercel.app/](https://kiroverse-hack-sprint-shipaton-edition.vercel.app/)
 
 ---
 
-## Tech Stack
+## Key Features & Capabilities
 
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | React 18 + TypeScript + Vite |
-| **Charts** | Recharts |
-| **Data (client)** | DuckDB-WASM — SQL queries on Parquet in the browser |
-| **Data (pipeline)** | DuckDB Node.js — generates Parquet files |
-| **Weather API** | [Open-Meteo](https://open-meteo.com/) (free, no API key needed) |
-| **Styling** | CSS Modules with CSS custom properties |
-| **Deployment** | Vercel |
+### 1. Safety & Disaster Preparedness
+- **PAGASA TCWS Warnings & Rainfall Advisories** — Real-time Tropical Cyclone Wind Signals (Signal 1 to 5) and Color-Coded Rainfall warnings (Yellow, Orange, Red) mapped directly to regional coordinates.
+- **Evacuation Center Locator** — Live nearby shelter finder querying OpenStreetMap Overpass API within search radiuses, showing distances and one-tap Google Maps directions.
+- **Emergency Hotlines** — Regional Office of Civil Defense (OCD) numbers and national 911 / NDRRMC / Red Cross emergency hotlines with tap-to-call support.
+- **Weather Alerts & Typhoon Banner** — High-visibility alerts for extreme heat indices, heavy rainfall, high wind gusts, and seasonal storm advisories.
+
+### 2. Intelligent Decision-Support Tools
+- **Kuya Weather Assistant** — Natural-language Taglish meteorological advisor capable of parsing intent for current weather, 7-day forecasts, flood risk modeling, heat index dangers, travel safety, and multi-region comparisons.
+- **Trip Go / No-Go Checker** — Weighted rule-engine evaluating wind, rain probability, visibility, and road hazards to provide a clear GO, CAUTION, or NO-GO travel verdict.
+- **Transport Surge Predictor** — Weather-driven surge multiplier forecasting for Grab, Angkas, Jeepneys, and walking routes with optimal departure timing.
+- **Smart Optimization Panel & Activity Planner** — Multi-criteria decision engine for running, hiking, beach trips, laundry, and commuting.
+
+### 3. Meteorological Analytics & Visualization
+- **Live Rain Radar (RainViewer)** — Real-time animated precipitation radar over the Philippine archipelago locked to national bounds.
+- **7-Day Forecast & Hourly Timeline** — Interactive temperature, precipitation probability, humidity, and wind trend charts built with Recharts.
+- **Historical Comparison** — Comparative analysis of current temperatures and rainfall against historical 10-year meteorological baselines (Open-Meteo Archive API).
+- **Side-by-Side Region Comparison** — Multi-region weather differential analyzer across all 17 administrative regions.
+
+### 4. Accessibility & Quality of Life
+- **Clean SVG Iconography** — Professional, accessible SVG icons replacing ambiguous emojis across all widgets.
+- **Light & Dark Theme** — Comprehensive color system with high-contrast mode and system preference auto-detection.
+- **Instant City Search & Geolocation** — Quick switcher covering 50+ Philippine cities and automated GPS location detection.
+- **Forecast Sharing & Favorites** — Quick clipboard/native share sheet and persistent saved region management via localStorage.
 
 ---
 
-## Project Structure
+## Technical Architecture
 
-```
-├── pipeline/              → Node.js data generation scripts
-├── public/data/           → Generated Parquet files served to browser
-├── src/
-│   ├── components/        → React UI components (70+ files)
-│   ├── hooks/             → Custom hooks (DuckDB, dark mode, favorites, geolocation)
-│   ├── utils/             → Types, helpers, city/region lists
-│   └── App.tsx            → Main app entry
-├── e2e/                   → Playwright end-to-end tests
-├── vercel.json            → Vercel deployment config
-└── package.json
-```
+| Layer | Technology | Description |
+|-------|-----------|-------------|
+| **Frontend Framework** | React 18 + TypeScript | Component-driven reactive UI architecture |
+| **Build Tool** | Vite | Lightning-fast HMR and optimized production bundling |
+| **Visualizations** | Recharts + Leaflet | Responsive time-series charts & interactive radar tiles |
+| **Live Weather API** | [Open-Meteo](https://open-meteo.com/) | Live 7-day hourly & daily forecasting |
+| **Air Quality & Archive** | Open-Meteo AQI & Archive | Real-time AQI metrics & 10-year historical weather patterns |
+| **Radar Imagery** | [RainViewer API](https://www.rainviewer.com/api.html) | Live radar composite animation over the Philippines |
+| **Geospatial Shelters** | OpenStreetMap Overpass API | Real-time querying of civic shelters and assembly points |
+| **Caching Layer** | Browser `localStorage` | TTL-based caching (30m forecast, 60m AQI/evacuation) with fallback |
+| **Offline Pipeline** | DuckDB (Node.js) | Optional offline Parquet generation in `pipeline/` |
+| **Deployment** | Vercel | Global edge CDN deployment |
 
 ---
 
@@ -72,69 +57,41 @@ A real-time Philippines weather dashboard that helps Filipinos decide whether to
 - Node.js 18+
 - npm 9+
 
-### Install & Run
+### Installation & Development
 
 ```bash
-# Clone the repo
-git clone https://github.com/debiangee/speedhackkiroweek9.git
-cd speedhackkiroweek9
+# Clone the repository
+git clone https://github.com/rolex-esto/portfolio.git
+cd Kirovers-Hack-Sprint-Shipaton-Edition
 
 # Install dependencies
 npm install
 
-# Generate data (Parquet files)
-npm run pipeline
-
-# Start dev server
+# Start Vite local development server
 npm run dev
+
+# Run test suite (Vitest)
+npm test
+
+# Build for production
+npm run build
 ```
 
-### Available Commands
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start Vite dev server (http://localhost:5173) |
-| `npm run build` | Production build to `dist/` |
-| `npm run pipeline` | Regenerate Parquet data files |
-| `npm run preview` | Preview production build locally |
-
 ---
 
-## Covered Regions
+## Covered Philippine Regions & Cities
 
-All 17 Philippine regions with city/province aliases:
+All 17 administrative regions and major urban hubs are fully indexed:
 
-> NCR, CAR, Ilocos, Cagayan Valley, Central Luzon, CALABARZON, MIMAROPA, Bicol, Western Visayas, Central Visayas, Eastern Visayas, Zamboanga Peninsula, Northern Mindanao, Davao, SOCCSKSARGEN, Caraga, BARMM
-
----
-
-## Chatbot Capabilities
-
-The "Kuya Weather" chatbot understands natural queries like:
-
-- `"bro what's the weather in Taguig"` → Current conditions with heat index
-- `"uulan ba sa Cebu?"` → Rain analysis with hourly breakdown
-- `"safe ba mag-travel sa Davao?"` → Travel advisory with transport modes
-- `"heat index sa NCR"` → Detailed heat report with PAGASA levels
-- `"baha risk sa Bicol"` → Flood risk assessment with 3-day outlook
-- `"compare Manila vs Baguio"` → Side-by-side region comparison
-
----
-
-## Built With Kiro
-
-This project was developed using [Kiro](https://kiro.dev), an AI-powered development environment, as part of a speed hackathon challenge. Kiro handled:
-
-- Feature implementation via structured specs (requirements → design → tasks)
-- Automated code generation with steering rules for consistency
-- Real-time diagnostics and build verification
-- Deployment automation
+- **Luzon:** National Capital Region (NCR), Cordillera Administrative Region (CAR), Ilocos (Region I), Cagayan Valley (Region II), Central Luzon (Region III), CALABARZON (Region IV-A), MIMAROPA (Region IV-B), Bicol (Region V).
+- **Visayas:** Western Visayas (Region VI), Central Visayas (Region VII), Eastern Visayas (Region VIII).
+- **Mindanao:** Zamboanga Peninsula (Region IX), Northern Mindanao (Region X), Davao (Region XI), SOCCSKSARGEN (Region XII), Caraga (Region XIII), Bangsamoro (BARMM).
 
 ---
 
 ## License
 
-MIT
+MIT License. Developed for Filipino resilience and community safety.
 
 ---
 

@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { AlertCircleIcon, FlagIcon } from './Icons';
 import 'leaflet/dist/leaflet.css';
 import './WeatherRiskMap.css';
 
@@ -188,7 +189,8 @@ export function WeatherRiskMap() {
 
       {error && (
         <div className="risk-map-error">
-          <span>⚠️ {error}</span>
+          <AlertCircleIcon size={16} color="#dc2626" />
+          <span>{error}</span>
         </div>
       )}
 
@@ -227,7 +229,10 @@ export function WeatherRiskMap() {
         )}
 
         {/* Region label */}
-        <div className="risk-map-region-label">🇵🇭 Philippines Radar</div>
+        <div className="risk-map-region-label">
+          <FlagIcon size={14} color="var(--accent)" />
+          <span>Philippines Radar</span>
+        </div>
 
         {/* Pan hint */}
         <div className="risk-map-pan-hint">Drag to pan · Scroll to zoom</div>

@@ -8,12 +8,16 @@ import {
   computeTransportImpact,
   generateRecommendations,
   classifySurgeLevel,
+  getSurgeMultiplier,
+  getMultiplierLabel,
+  formatHour,
 } from '../utils/surge-engine';
 import type { SurgeResult } from '../utils/surge-engine';
 import { SurgeAlert } from './SurgeAlert';
 import { SurgeTimeline } from './SurgeTimeline';
 import { TransportModeCards } from './TransportModeCards';
 import { SurgeRecommendations } from './SurgeRecommendations';
+import { StarIcon, LightbulbIcon, CloudRainIcon, CarIcon, BanknoteIcon, WavesIcon } from './Icons';
 import './TransportSurgePredictor.css';
 
 interface Props {
@@ -107,6 +111,36 @@ export function TransportSurgePredictor({ hourly, cityCoords }: Props) {
     ? dayOverview.reduce((best, day, i) => day.peakScore < dayOverview[best].peakScore ? i : best, 0)
     : 0;
 
+  function renderFactorIcon(factor: SurgeResult['topFactor']) {
+    switch (factor) {
+      case 'weather':
+        return <CloudRainIcon size={14} color="currentColor" />;
+      case 'rush_hour':
+        return <CarIcon size={14} color="currentColor" />;
+      case 'payday':
+        return <BanknoteIcon size={14} color="currentColor" />;
+      case 'sustained_rain':
+        return <WavesIcon size={14} color="currentColor" />;
+      default:
+        return <CloudRainIcon size={14} color="currentColor" />;
+    }
+  }
+
+  function formatFactorName(factor: SurgeResult['topFactor']) {
+    switch (factor) {
+      case 'weather':
+        return 'Severe Weather & Rain';
+      case 'rush_hour':
+        return 'Peak Commute Rush Hour';
+      case 'payday':
+        return 'Payday Demand Spike';
+      case 'sustained_rain':
+        return 'Sustained Heavy Precipitation';
+      default:
+        return 'Weather Conditions';
+    }
+  }
+
   if (hourly.length === 0) return null;
 
   return (
@@ -123,10 +157,52 @@ export function TransportSurgePredictor({ hourly, cityCoords }: Props) {
           >
             <span className={`day-dot level-dot-${day.level.toLowerCase()}`} />
             <span className="day-chip-label">{day.dayLabel}</span>
-            {i === bestDayIdx && <span className="best-badge">⭐</span>}
+            {i === bestDayIdx && (
+              <span className="best-badge" title="Best day to travel">
+                <StarIcon size={12} color="#f59e0b" />
+              </span>
+            )}
           </button>
         ))}
       </div>
+
+      {/* Hero Surge Multiplier Card */}
+      {activeResult && (
+        <div className={`surge-hero-card surge-hero-${activeResult.level.toLowerCase()}`}>
+          <div className="surge-hero-header">
+            <div className="surge-hero-caption-group">
+              <span className="surge-hero-title">
+                {selectedDayIdx === 0 ? 'CURRENT SURGE' : 'DAY PEAK SURGE'}
+              </span>
+              <span className="surge-hero-time">({formatHour(activeResult.hour)})</span>
+            </div>
+            <span className={`surge-level-pill level-pill-${activeResult.level.toLowerCase()}`}>
+              <span className="level-pulse-dot" aria-hidden="true" />
+              {activeResult.level} DEMAND
+            </span>
+          </div>
+
+          <div className="surge-hero-body">
+            <div className="surge-multiplier-group">
+              <span className="surge-multiplier-number">
+                {getSurgeMultiplier(activeResult.level).toFixed(1)}×
+              </span>
+              <div className="surge-multiplier-meta">
+                <span className="surge-multiplier-range">{getMultiplierLabel(activeResult.level)} multiplier</span>
+                <span className="surge-index-text">Surge index: <strong>{activeResult.score}/100</strong></span>
+              </div>
+            </div>
+
+            <div className="surge-top-factor">
+              <span className="factor-label">Top Driving Factor:</span>
+              <span className="factor-pill">
+                <span className="factor-icon" aria-hidden="true">{renderFactorIcon(activeResult.topFactor)}</span>
+                <span className="factor-name">{formatFactorName(activeResult.topFactor)}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pre-Surge Alert (today only) */}
       {selectedDayIdx === 0 && (
@@ -143,13 +219,19 @@ export function TransportSurgePredictor({ hourly, cityCoords }: Props) {
 
       {/* Transport Mode Breakdown */}
       {transportImpacts.length > 0 && (
-        <TransportModeCards impacts={transportImpacts} />
+        <div className="surge-modes-section">
+          <h4 className="surge-subsection-title">Ride-Hailing & Commute Status</h4>
+          <TransportModeCards impacts={transportImpacts} />
+        </div>
       )}
 
       {/* Smart Booking Recommendations (today only) */}
       {recommendations.length > 0 && (
         <div className="surge-recs-section">
-          <h4 className="surge-subsection-title">💡 Smart Booking Tips</h4>
+          <h4 className="surge-subsection-title">
+            <LightbulbIcon size={16} color="var(--accent)" />
+            <span>Smart Booking Tips</span>
+          </h4>
           <SurgeRecommendations recommendations={recommendations} />
         </div>
       )}

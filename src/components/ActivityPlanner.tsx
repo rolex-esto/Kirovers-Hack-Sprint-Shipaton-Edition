@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { type HourlyData, type DailySummary } from '../hooks/useWeatherData';
-import { SunIcon, CheckCircleIcon, AlertCircleIcon } from './Icons';
+import { SunIcon, CheckCircleIcon, AlertCircleIcon, BeachIcon, HikingIcon, CarIcon, EventIcon, BicycleIcon } from './Icons';
 import './ActivityPlanner.css';
 
 interface ActivityPlannerProps {
@@ -10,12 +10,12 @@ interface ActivityPlannerProps {
 
 type Activity = 'beach' | 'hiking' | 'commute' | 'outdoor-event' | 'cycling';
 
-const ACTIVITIES: { id: Activity; label: string; icon: string }[] = [
-  { id: 'beach', label: 'Beach', icon: '🏖️' },
-  { id: 'hiking', label: 'Hiking', icon: '🥾' },
-  { id: 'commute', label: 'Commute', icon: '🚗' },
-  { id: 'outdoor-event', label: 'Outdoor Event', icon: '🎪' },
-  { id: 'cycling', label: 'Cycling', icon: '🚴' },
+const ACTIVITIES: { id: Activity; label: string; renderIcon: () => JSX.Element }[] = [
+  { id: 'beach', label: 'Beach', renderIcon: () => <BeachIcon size={18} color="currentColor" /> },
+  { id: 'hiking', label: 'Hiking', renderIcon: () => <HikingIcon size={18} color="currentColor" /> },
+  { id: 'commute', label: 'Commute', renderIcon: () => <CarIcon size={18} color="currentColor" /> },
+  { id: 'outdoor-event', label: 'Outdoor Event', renderIcon: () => <EventIcon size={18} color="currentColor" /> },
+  { id: 'cycling', label: 'Cycling', renderIcon: () => <BicycleIcon size={18} color="currentColor" /> },
 ];
 
 interface DayScore {
@@ -111,7 +111,7 @@ export function ActivityPlanner({ hourly, daily }: ActivityPlannerProps) {
             onClick={() => setSelected(a.id)}
             aria-pressed={selected === a.id}
           >
-            <span className="activity-icon" aria-hidden="true">{a.icon}</span>
+            <span className="activity-icon" aria-hidden="true">{a.renderIcon()}</span>
             <span>{a.label}</span>
           </button>
         ))}
