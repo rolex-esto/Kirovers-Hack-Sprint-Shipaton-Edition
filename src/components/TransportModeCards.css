@@ -5,14 +5,14 @@
 .transport-modes {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.65rem;
+  gap: 0.75rem;
 }
 
 .transport-card {
   display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.95rem 1.1rem 1.1rem;
   border-radius: var(--radius-sm);
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -35,6 +35,20 @@
   background: var(--bg-card-hover);
 }
 
+.tc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tc-icon-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
 .tc-icon {
   display: flex;
   align-items: center;
@@ -47,33 +61,85 @@
   flex-shrink: 0;
 }
 
-.tc-info {
+.tc-title-group {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
-  min-width: 0;
+  gap: 0.1rem;
 }
 
 .tc-name {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.tc-status {
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--text-primary);
-  line-height: 1.25;
+  line-height: 1.2;
+}
+
+.tc-rate-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.2;
+}
+
+.tc-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.badge-good {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badge-moderate {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.badge-poor {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.badge-severe {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+[data-theme="dark"] .badge-good {
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+}
+
+[data-theme="dark"] .badge-moderate {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fde68a;
+}
+
+[data-theme="dark"] .badge-poor {
+  background: rgba(249, 115, 22, 0.2);
+  color: #fdba74;
+}
+
+[data-theme="dark"] .badge-severe {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.tc-body {
+  display: flex;
+  flex-direction: column;
 }
 
 .tc-tip {
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   color: var(--text-secondary);
-  line-height: 1.35;
-  margin-top: 0.1rem;
+  line-height: 1.4;
+  margin: 0;
 }
 
 .tc-severity-bar {
@@ -81,7 +147,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 3.5px;
 }
 
 .severity-bar-good { background: #22c55e; }
@@ -95,9 +161,10 @@
 .transport-card.severity-poor { border-left: 3.5px solid #f97316; }
 .transport-card.severity-severe { border-left: 3.5px solid #ef4444; }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
   .transport-modes {
     grid-template-columns: 1fr;
   }
 }
+
 

@@ -141,7 +141,35 @@ export function TransportSurgePredictor({ hourly, cityCoords }: Props) {
     }
   }
 
+  function getDemandExplanation(level: SurgeResult['level'], multiplier: number): string {
+    switch (level) {
+      case 'LOW':
+        return 'Fares are at normal base rates. Great time to book Grab or Angkas with fast driver matching.';
+      case 'MODERATE':
+        return `Demand is moderately higher than usual (~${multiplier.toFixed(1)}× standard fare). Slightly elevated pricing.`;
+      case 'HIGH':
+        return `High demand surge in effect (~${multiplier.toFixed(1)}× fare). Expect higher prices and longer driver matching.`;
+      case 'EXTREME':
+        return `Severe surge pricing (~${multiplier.toFixed(1)}× fare)! Peak demand and poor road conditions.`;
+    }
+  }
+
+  function getDemandPillLabel(level: SurgeResult['level']): string {
+    switch (level) {
+      case 'LOW':
+        return 'Normal Base Fares';
+      case 'MODERATE':
+        return 'Moderate Demand';
+      case 'HIGH':
+        return 'High Fare Surge';
+      case 'EXTREME':
+        return 'Severe Price Surge';
+    }
+  }
+
   if (hourly.length === 0) return null;
+
+  const currentMultiplier = activeResult ? getSurgeMultiplier(activeResult.level) : 1.0;
 
   return (
     <div className="surge-predictor">
@@ -158,7 +186,7 @@ export function TransportSurgePredictor({ hourly, cityCoords }: Props) {
             <span className={`day-dot level-dot-${day.level.toLowerCase()}`} />
             <span className="day-chip-label">{day.dayLabel}</span>
             {i === bestDayIdx && (
-              <span className="best-badge" title="Best day to travel">
+              <span className="best-badge" title="Lowest overall fare day this week">
                 <StarIcon size={12} color="#f59e0b" />
               </span>
             )}
@@ -166,35 +194,39 @@ export function TransportSurgePredictor({ hourly, cityCoords }: Props) {
         ))}
       </div>
 
-      {/* Hero Surge Multiplier Card */}
+      {/* Hero Surge Multiplier Card — Non-Technical Friendly */}
       {activeResult && (
         <div className={`surge-hero-card surge-hero-${activeResult.level.toLowerCase()}`}>
           <div className="surge-hero-header">
             <div className="surge-hero-caption-group">
               <span className="surge-hero-title">
-                {selectedDayIdx === 0 ? 'CURRENT SURGE' : 'DAY PEAK SURGE'}
+                {selectedDayIdx === 0 ? 'CURRENT FARE SURGE' : 'DAY PEAK FARE ESTIMATE'}
               </span>
               <span className="surge-hero-time">({formatHour(activeResult.hour)})</span>
             </div>
             <span className={`surge-level-pill level-pill-${activeResult.level.toLowerCase()}`}>
               <span className="level-pulse-dot" aria-hidden="true" />
-              {activeResult.level} DEMAND
+              {getDemandPillLabel(activeResult.level)}
             </span>
           </div>
 
           <div className="surge-hero-body">
             <div className="surge-multiplier-group">
-              <span className="surge-multiplier-number">
-                {getSurgeMultiplier(activeResult.level).toFixed(1)}×
-              </span>
+              <div className="surge-number-box">
+                <span className="surge-multiplier-number">
+                  {currentMultiplier.toFixed(1)}×
+                </span>
+                <span className="surge-rate-badge">{getMultiplierLabel(activeResult.level)} rate</span>
+              </div>
               <div className="surge-multiplier-meta">
-                <span className="surge-multiplier-range">{getMultiplierLabel(activeResult.level)} multiplier</span>
-                <span className="surge-index-text">Surge index: <strong>{activeResult.score}/100</strong></span>
+                <p className="surge-plain-explanation">
+                  {getDemandExplanation(activeResult.level, currentMultiplier)}
+                </p>
               </div>
             </div>
 
             <div className="surge-top-factor">
-              <span className="factor-label">Top Driving Factor:</span>
+              <span className="factor-label">Main Cause of Surge:</span>
               <span className="factor-pill">
                 <span className="factor-icon" aria-hidden="true">{renderFactorIcon(activeResult.topFactor)}</span>
                 <span className="factor-name">{formatFactorName(activeResult.topFactor)}</span>

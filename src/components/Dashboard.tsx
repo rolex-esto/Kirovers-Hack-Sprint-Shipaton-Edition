@@ -240,7 +240,7 @@ export function Dashboard() {
               <CalendarIcon size={18} color="var(--accent)" />
               <h2 className="section-title">Week at a Glance</h2>
             </div>
-            <p className="section-desc">Rain outlook for the next 7 days</p>
+            <p className="section-desc">7-day rain probability, temperatures, and best days for outdoor plans</p>
             <WeekSummaryCard daily={daily} region={selectedRegion} />
           </div>
 
@@ -298,7 +298,7 @@ export function Dashboard() {
               <h2 className="section-title">Transport Surge Predictor</h2>
               <span className="section-badge">Live</span>
             </div>
-            <p className="section-desc">Predict ride-hailing price surges based on weather and demand patterns</p>
+            <p className="section-desc">Real-time fare estimates for Grab, Angkas, and commute routes based on weather & traffic demand</p>
             <ErrorBoundary>
               <Suspense fallback={<p className="lazy-loading">Loading surge predictions...</p>}>
                 <TransportSurgePredictor

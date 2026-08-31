@@ -38,7 +38,7 @@ export function WeekSummaryCard({ daily, region: _region }: WeekSummaryCardProps
           </div>
           <div>
             <span className="stat-value">{totalRain.toFixed(1)} mm</span>
-            <span className="stat-label">Total rain</span>
+            <span className="stat-label">Expected 7-day rainfall</span>
           </div>
         </div>
         <div className="week-stat">
@@ -47,7 +47,7 @@ export function WeekSummaryCard({ daily, region: _region }: WeekSummaryCardProps
           </div>
           <div>
             <span className="stat-value">{avgTemp}°C</span>
-            <span className="stat-label">Avg temp</span>
+            <span className="stat-label">Average daytime temp</span>
           </div>
         </div>
         <div className="week-stat">
@@ -56,7 +56,7 @@ export function WeekSummaryCard({ daily, region: _region }: WeekSummaryCardProps
           </div>
           <div>
             <span className="stat-value">{bestDayLabel}</span>
-            <span className="stat-label">Driest day</span>
+            <span className="stat-label">Driest day (Best for plans)</span>
           </div>
         </div>
         <div className="week-stat">
@@ -65,7 +65,7 @@ export function WeekSummaryCard({ daily, region: _region }: WeekSummaryCardProps
           </div>
           <div>
             <span className="stat-value">{worstDayLabel}</span>
-            <span className="stat-label">Wettest day</span>
+            <span className="stat-label">Wettest day (Pack umbrella)</span>
           </div>
         </div>
       </div>

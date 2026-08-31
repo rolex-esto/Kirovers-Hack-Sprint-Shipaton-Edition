@@ -82,17 +82,21 @@ export function SurgeTimeline({ results, bestWindow, peakWindow, currentHour }: 
           {peakWindow && (
             <div className="window-chip peak" title="High surge period — avoid booking if flexible">
               <AlertCircleIcon size={13} color="#dc2626" />
-              <span>Avoid: <strong>{formatHour(peakWindow.startHour)} – {formatHour(peakWindow.endHour)}</strong></span>
+              <span>Avoid Peak: <strong>{formatHour(peakWindow.startHour)} – {formatHour(peakWindow.endHour)}</strong></span>
             </div>
           )}
           {bestWindow && (
             <div className="window-chip best" title="Low demand period — lowest fares and fastest pickups">
               <ZapIcon size={13} color="#16a34a" />
-              <span>Best: <strong>{formatHour(bestWindow.startHour)} – {formatHour(bestWindow.endHour)}</strong></span>
+              <span>Best Rates: <strong>{formatHour(bestWindow.startHour)} – {formatHour(bestWindow.endHour)}</strong></span>
             </div>
           )}
         </div>
       </div>
+
+      <p className="timeline-helper-text">
+        24-Hour Fare Surge Forecast · Green represents standard base fares, while orange/red represent peak surge pricing.
+      </p>
 
       {/* Chart Surface */}
       <div className="surge-chart-container">
