@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useWeatherData } from '../hooks/useWeatherData';
 import { useFavorites } from '../hooks/useFavorites';
 import { useGeolocation } from '../hooks/useGeolocation';
@@ -32,12 +32,13 @@ import { getRegionLabel } from '../utils/regions';
 import { getCityCoords } from '../utils/cities';
 import './Dashboard.css';
 
-// Lazy load heavy chart components
+// Lazy load heavy components
 const RainChart = lazy(() => import('./RainChart').then((m) => ({ default: m.RainChart })));
 const WeatherChatbot = lazy(() => import('./WeatherChatbot').then((m) => ({ default: m.WeatherChatbot })));
 const CompareRegions = lazy(() => import('./CompareRegions').then((m) => ({ default: m.CompareRegions })));
 const HistoricalComparison = lazy(() => import('./HistoricalComparison').then((m) => ({ default: m.HistoricalComparison })));
 const TransportSurgePredictor = lazy(() => import('./TransportSurgePredictor'));
+const WeatherReality = lazy(() => import('./WeatherReality/WeatherReality').then((m) => ({ default: m.WeatherReality })));
 
 // Region coordinates for historical comparison
 const REGION_COORDS: Record<string, { lat: number; lon: number }> = {
@@ -65,8 +66,25 @@ export function Dashboard() {
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [compareMode, setCompareMode] = useState(false);
+  const [realityHourOffset, setRealityHourOffset] = useState(0);
   const { favorites, toggleFavorite, removeFavorite, isFavorite } = useFavorites();
   const { detecting, error: geoError, detect } = useGeolocation();
+
+  // Listen for Kuya Weather reality simulation triggers
+  useEffect(() => {
+    const handleTrigger = (e: Event) => {
+      const customEvent = e as CustomEvent<{ region?: string; hourOffset?: number }>;
+      if (customEvent.detail?.region && customEvent.detail.region !== selectedRegion) {
+        setSelectedRegion(customEvent.detail.region);
+        setSelectedCity(null);
+      }
+      if (typeof customEvent.detail?.hourOffset === 'number') {
+        setRealityHourOffset(customEvent.detail.hourOffset);
+      }
+    };
+    window.addEventListener('weather-reality-trigger', handleTrigger);
+    return () => window.removeEventListener('weather-reality-trigger', handleTrigger);
+  }, [selectedRegion]);
 
   // Get city coordinates if a city is selected, otherwise use region center
   const cityCoords = selectedCity ? getCityCoords(selectedRegion, selectedCity) : null;
@@ -232,6 +250,20 @@ export function Dashboard() {
               selectedCity={selectedCity}
               onSelectCity={setSelectedCity}
             />
+          </div>
+
+          {/* Weather Reality — Real-Time First-Person 3D Weather Simulation */}
+          <div id="weather-reality-section">
+            <ErrorBoundary>
+              <Suspense fallback={<p className="lazy-loading">Loading Weather Reality simulation...</p>}>
+                <WeatherReality
+                  region={selectedRegion}
+                  selectedCity={selectedCity}
+                  hourly={hourly}
+                  initialForecastHourOffset={realityHourOffset}
+                />
+              </Suspense>
+            </ErrorBoundary>
           </div>
 
           {/* Week at a Glance */}

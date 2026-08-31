@@ -89,10 +89,17 @@ const REGION_ALIASES: Record<string, string> = {
   'lanao': 'BARMM', 'maguindanao': 'BARMM',
 };
 
+interface RealityAction {
+  region: string;
+  hourOffset?: number;
+  label: string;
+}
+
 interface Message {
   role: 'bot' | 'user';
   text: string;
   followUps?: string[];
+  realityAction?: RealityAction;
 }
 
 // Extended hourly entry with all signals needed for accurate prediction
@@ -893,6 +900,7 @@ function generateFollowUps(intent: Intent, region: string): string[] {
 interface BotResponseResult {
   text: string;
   followUps: string[];
+  realityAction?: RealityAction;
 }
 
 async function generateBotResponse(userText: string, selectedRegion: string): Promise<BotResponseResult> {
@@ -911,20 +919,52 @@ async function generateBotResponse(userText: string, selectedRegion: string): Pr
   }
 
   const followUps = generateFollowUps(intent, detectedRegion);
+  const defaultRealityAction: RealityAction = {
+    region: detectedRegion,
+    label: `Experience ${detectedRegion} Weather`,
+  };
 
   switch (intent) {
     case 'weather_now':
-      return { text: buildCurrentResponse(detectedRegion, data), followUps };
+      return {
+        text: buildCurrentResponse(detectedRegion, data),
+        followUps,
+        realityAction: defaultRealityAction,
+      };
     case 'forecast':
-      return { text: buildForecastResponse(detectedRegion, data), followUps };
+      return {
+        text: buildForecastResponse(detectedRegion, data),
+        followUps,
+        realityAction: {
+          region: detectedRegion,
+          hourOffset: 1,
+          label: `Experience ${detectedRegion} Forecast`,
+        },
+      };
     case 'rain':
-      return { text: buildRainResponse(detectedRegion, data), followUps };
+      return {
+        text: buildRainResponse(detectedRegion, data),
+        followUps,
+        realityAction: defaultRealityAction,
+      };
     case 'travel':
-      return { text: buildTravelResponse(detectedRegion, data), followUps };
+      return {
+        text: buildTravelResponse(detectedRegion, data),
+        followUps,
+        realityAction: defaultRealityAction,
+      };
     case 'heat':
-      return { text: buildHeatResponse(detectedRegion, data), followUps };
+      return {
+        text: buildHeatResponse(detectedRegion, data),
+        followUps,
+        realityAction: defaultRealityAction,
+      };
     case 'flood':
-      return { text: buildFloodResponse(detectedRegion, data), followUps };
+      return {
+        text: buildFloodResponse(detectedRegion, data),
+        followUps,
+        realityAction: defaultRealityAction,
+      };
     case 'compare': {
       // Try to find two regions in the query
       const allRegions: string[] = [];
@@ -1171,6 +1211,7 @@ export function WeatherChatbot({ selectedRegion }: { selectedRegion: string }) {
           role: 'bot',
           text: response.text,
           followUps: response.followUps,
+          realityAction: response.realityAction,
         },
       ]);
     } catch {
@@ -1247,6 +1288,30 @@ export function WeatherChatbot({ selectedRegion }: { selectedRegion: string }) {
                       </div>
                     ))}
                   </div>
+
+                  {msg.role === 'bot' && msg.realityAction && (
+                    <div className="msg-reality-action">
+                      <button
+                        type="button"
+                        className="reality-action-btn"
+                        onClick={() => {
+                          window.dispatchEvent(
+                            new CustomEvent('weather-reality-trigger', {
+                              detail: {
+                                region: msg.realityAction?.region,
+                                hourOffset: msg.realityAction?.hourOffset ?? 0,
+                              },
+                            })
+                          );
+                          const el = document.getElementById('weather-reality-section');
+                          if (el) el.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                      >
+                        <SparklesIcon size={13} color="var(--accent)" />
+                        <span>{msg.realityAction.label}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Contextual Follow-Up Questions (Rendered on Bot Answers) */}
