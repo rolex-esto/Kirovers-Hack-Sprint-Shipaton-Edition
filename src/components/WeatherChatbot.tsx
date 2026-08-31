@@ -1,5 +1,36 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageCircleIcon, XIcon, SendIcon, BotIcon, UserIcon } from './Icons';
+import {
+  MessageCircleIcon,
+  XIcon,
+  SendIcon,
+  BotIcon,
+  UserIcon,
+  MapPinIcon,
+  ThermometerIcon,
+  DropletIcon,
+  WindIcon,
+  EyeIcon,
+  AlertTriangleIcon,
+  CloudSunIcon,
+  SunIcon,
+  CloudRainIcon,
+  CloudLightningIcon,
+  LightbulbIcon,
+  CheckCircleIcon,
+  TrendingUpIcon,
+  CalendarIcon,
+  ClockIcon,
+  CarIcon,
+  MotorcycleIcon,
+  BusIcon,
+  WalkingIcon,
+  ShieldIcon,
+  WavesIcon,
+  UmbrellaIcon,
+  StarIcon,
+  CloudIcon,
+  SparklesIcon,
+} from './Icons';
 import './WeatherChatbot.css';
 
 // Region coordinates for direct API fetching
@@ -61,6 +92,7 @@ const REGION_ALIASES: Record<string, string> = {
 interface Message {
   role: 'bot' | 'user';
   text: string;
+  followUps?: string[];
 }
 
 // Extended hourly entry with all signals needed for accurate prediction
@@ -798,28 +830,101 @@ function buildFloodResponse(region: string, data: HourlyEntry[]): string {
   return response;
 }
 
-async function generateBotResponse(userText: string, selectedRegion: string): Promise<string> {
+function generateFollowUps(intent: Intent, region: string): string[] {
+  switch (intent) {
+    case 'weather_now':
+      return [
+        `Uulan ba mamayang hapon sa ${region}?`,
+        `Heat index at ramdam na init sa ${region}?`,
+        `Safe ba mag-commute / Grab surge ngayon?`,
+        `7-day weather forecast sa ${region}`,
+      ];
+    case 'forecast':
+      return [
+        `Aling araw ang pinakatuyo (driest day) sa ${region}?`,
+        `May malakas na ulan ba ngayong weekend sa ${region}?`,
+        `Weather ngayon sa ${region}`,
+        `Compare ${region} vs Baguio`,
+      ];
+    case 'rain':
+      return [
+        `Kailan titila ang ulan sa ${region}?`,
+        `May baha risk ba sa ${region}?`,
+        `Anong oras pinakasafe bumiyahe?`,
+        `7-day rain outlook sa ${region}`,
+      ];
+    case 'travel':
+      return [
+        `Kailan ang best dry window to travel?`,
+        `Grab at Angkas fare status ngayon?`,
+        `May baha advisory ba sa ${region}?`,
+        `Weather forecast bukas sa ${region}`,
+      ];
+    case 'heat':
+      return [
+        `Kailan pinakamainit na oras ngayon?`,
+        `May ulan ba mamayang gabi sa ${region}?`,
+        `Safe ba outdoor activities ngayon?`,
+        `Current weather summary sa ${region}`,
+      ];
+    case 'flood':
+      return [
+        `Safe ba daanan ang mga kalsada sa ${region}?`,
+        `Kailan hihina ang ulan sa ${region}?`,
+        `Emergency hotlines sa ${region}`,
+        `7-day rain forecast`,
+      ];
+    case 'compare':
+      return [
+        `Saan mas safe mag-travel ngayon?`,
+        `Uulan ba bukas sa kanila?`,
+        `Heat index comparison`,
+      ];
+    default:
+      return [
+        `Weather ngayon sa ${region}`,
+        `Uulan ba mamaya sa ${region}?`,
+        `Heat index sa ${region}`,
+        `7-day forecast sa ${region}`,
+      ];
+  }
+}
+
+interface BotResponseResult {
+  text: string;
+  followUps: string[];
+}
+
+async function generateBotResponse(userText: string, selectedRegion: string): Promise<BotResponseResult> {
   const detectedRegion = detectRegion(userText) || selectedRegion;
   const intent = detectIntent(userText);
 
   const data = await fetchWeatherForRegion(detectedRegion);
   if (!data) {
-    return `Ay sorry, tol! Hindi ko ma-fetch ang weather data para sa ${detectedRegion} ngayon. Baka may internet issue. Try mo ulit!`;
+    return {
+      text: `Ay sorry, tol! Hindi ko ma-fetch ang weather data para sa ${detectedRegion} ngayon. Baka may internet issue. Try mo ulit!`,
+      followUps: [
+        `Weather ngayon sa ${selectedRegion}`,
+        `Uulan ba sa ${selectedRegion}?`,
+      ],
+    };
   }
+
+  const followUps = generateFollowUps(intent, detectedRegion);
 
   switch (intent) {
     case 'weather_now':
-      return buildCurrentResponse(detectedRegion, data);
+      return { text: buildCurrentResponse(detectedRegion, data), followUps };
     case 'forecast':
-      return buildForecastResponse(detectedRegion, data);
+      return { text: buildForecastResponse(detectedRegion, data), followUps };
     case 'rain':
-      return buildRainResponse(detectedRegion, data);
+      return { text: buildRainResponse(detectedRegion, data), followUps };
     case 'travel':
-      return buildTravelResponse(detectedRegion, data);
+      return { text: buildTravelResponse(detectedRegion, data), followUps };
     case 'heat':
-      return buildHeatResponse(detectedRegion, data);
+      return { text: buildHeatResponse(detectedRegion, data), followUps };
     case 'flood':
-      return buildFloodResponse(detectedRegion, data);
+      return { text: buildFloodResponse(detectedRegion, data), followUps };
     case 'compare': {
       // Try to find two regions in the query
       const allRegions: string[] = [];
@@ -893,32 +998,153 @@ async function generateBotResponse(userText: string, selectedRegion: string): Pr
               response += `🤝 Pareho lang sila! Pick mo na lang, pre!`;
             }
 
-            return response;
+            return { text: response, followUps };
           }
         }
       }
-      return buildCurrentResponse(detectedRegion, data) + `\n\n💡 Tip: "compare Manila vs Cebu" para magkumpara!`;
+      return {
+        text: buildCurrentResponse(detectedRegion, data) + `\n\n💡 Tip: "compare Manila vs Cebu" para magkumpara!`,
+        followUps,
+      };
     }
     default:
-      return buildCurrentResponse(detectedRegion, data);
+      return { text: buildCurrentResponse(detectedRegion, data), followUps };
   }
 }
 
-const SUGGESTIONS = [
-  'Weather ngayon sa Manila?',
-  'Uulan ba sa Cebu?',
-  'Safe ba mag-travel sa Davao?',
-  'Heat index sa NCR?',
-  'Baha risk sa Bicol?',
-  'Compare Manila vs Baguio',
-];
+function getIconForEmoji(emoji: string, idx: number | string): React.ReactNode | null {
+  switch (emoji) {
+    case '📍':
+      return <MapPinIcon key={idx} size={14} color="var(--accent)" className="inline-msg-svg" />;
+    case '🌡️':
+    case '🌡':
+      return <ThermometerIcon key={idx} size={14} color="#f97316" className="inline-msg-svg" />;
+    case '💧':
+      return <DropletIcon key={idx} size={14} color="#3b82f6" className="inline-msg-svg" />;
+    case '💨':
+      return <WindIcon key={idx} size={14} color="#0284c7" className="inline-msg-svg" />;
+    case '👁️':
+    case '👁':
+      return <EyeIcon key={idx} size={14} color="var(--text-secondary)" className="inline-msg-svg" />;
+    case '⚠️':
+    case '⚠':
+    case '🚨':
+      return <AlertTriangleIcon key={idx} size={14} color="#f59e0b" className="inline-msg-svg" />;
+    case '⛅':
+    case '🌤️':
+    case '🌤':
+      return <CloudSunIcon key={idx} size={14} color="#f59e0b" className="inline-msg-svg" />;
+    case '☀️':
+      return <SunIcon key={idx} size={14} color="#f59e0b" className="inline-msg-svg" />;
+    case '🌧️':
+    case '🌧':
+    case '🌦️':
+    case '🌦':
+      return <CloudRainIcon key={idx} size={14} color="#3b82f6" className="inline-msg-svg" />;
+    case '⛈️':
+    case '⛈':
+      return <CloudLightningIcon key={idx} size={14} color="#6366f1" className="inline-msg-svg" />;
+    case '💡':
+      return <LightbulbIcon key={idx} size={14} color="#f59e0b" className="inline-msg-svg" />;
+    case '✅':
+      return <CheckCircleIcon key={idx} size={14} color="#16a34a" className="inline-msg-svg" />;
+    case '🛡️':
+    case '🛡':
+      return <ShieldIcon key={idx} size={14} color="#16a34a" className="inline-msg-svg" />;
+    case '🌊':
+      return <WavesIcon key={idx} size={14} color="#3b82f6" className="inline-msg-svg" />;
+    case '📅':
+      return <CalendarIcon key={idx} size={14} color="var(--accent)" className="inline-msg-svg" />;
+    case '⏰':
+    case '⏱️':
+      return <ClockIcon key={idx} size={14} color="var(--accent)" className="inline-msg-svg" />;
+    case '🚗':
+    case '🚕':
+      return <CarIcon key={idx} size={14} color="var(--accent)" className="inline-msg-svg" />;
+    case '🏍️':
+    case '🛵':
+      return <MotorcycleIcon key={idx} size={14} color="var(--accent)" className="inline-msg-svg" />;
+    case '🚌':
+      return <BusIcon key={idx} size={14} color="var(--accent)" className="inline-msg-svg" />;
+    case '🚶':
+    case '🚶‍♂️':
+      return <WalkingIcon key={idx} size={14} color="var(--accent)" className="inline-msg-svg" />;
+    case '☂️':
+    case '☔':
+      return <UmbrellaIcon key={idx} size={14} color="#3b82f6" className="inline-msg-svg" />;
+    case '⚔️':
+    case '📈':
+      return <TrendingUpIcon key={idx} size={14} color="var(--accent)" className="inline-msg-svg" />;
+    case '📉':
+      return <TrendingUpIcon key={idx} size={14} color="#ef4444" className="inline-msg-svg" />;
+    case '🥵':
+      return <ThermometerIcon key={idx} size={14} color="#ef4444" className="inline-msg-svg" />;
+    case '🌫️':
+    case '🌫':
+      return <CloudIcon key={idx} size={14} color="var(--text-muted)" className="inline-msg-svg" />;
+    case '⭐':
+    case '🌟':
+      return <StarIcon key={idx} size={14} color="#f59e0b" className="inline-msg-svg" />;
+    case '🤝':
+      return <CheckCircleIcon key={idx} size={14} color="var(--accent)" className="inline-msg-svg" />;
+    default:
+      return null;
+  }
+}
+
+const EMOJI_SPLIT_REGEX = /(📍|🌡️|🌡|💧|💨|👁️|👁|⚠️|⚠|🚨|⛅|🌤️|🌤|☀️|🌧️|🌧|🌦️|🌦|⛈️|⛈|💡|✅|🛡️|🛡|🌊|📅|⏰|⏱️|🚗|🚕|🏍️|🛵|🚌|🚶|🚶‍♂️|☂️|☔|⚔️|📈|📉|🥵|🌫️|🌫|⭐|🌟|🤝)/gu;
+
+function renderRichMessageLine(line: string, key: number | string) {
+  if (line.match(/^[─]{3,}$/)) {
+    return <hr key={key} className="msg-divider" />;
+  }
+
+  const parts = line.split(EMOJI_SPLIT_REGEX);
+
+  const renderedParts = parts.map((part, pIdx) => {
+    const icon = getIconForEmoji(part, `${key}-${pIdx}`);
+    if (icon) {
+      return (
+        <span key={pIdx} className="msg-icon-token" aria-hidden="true">
+          {icon}
+        </span>
+      );
+    }
+
+    // Split for markdown bold **text**
+    const boldParts = part.split(/\*\*(.+?)\*\*/g);
+    return (
+      <span key={pIdx}>
+        {boldParts.map((bPart, bIdx) =>
+          bIdx % 2 === 1 ? (
+            <strong key={bIdx}>{bPart}</strong>
+          ) : (
+            <span key={bIdx}>{bPart}</span>
+          )
+        )}
+      </span>
+    );
+  });
+
+  return (
+    <span key={key} className={`msg-line ${line.startsWith('  ') ? 'msg-indent' : ''}`}>
+      {renderedParts}
+    </span>
+  );
+}
 
 export function WeatherChatbot({ selectedRegion }: { selectedRegion: string }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'bot',
-      text: `${getGreeting()} Ako si Kuya Weather — your everyday Philippine weather decision assistant.\n\nSubukan magtanong tungkol sa:\n• **Current weather & Heat Index** sa inyong lugar\n• **7-Day Rain & Thunderstorm** forecast\n• **Travel Safety & Flood Risk** advisory\n• **Side-by-Side Comparison** ng dalawang probinsya/cities\n\nType ka lang ng tanong sa baba, tol!`,
+      text: `📍 **${selectedRegion || 'Philippines'}**\n${getGreeting()} Ako si Kuya Weather — your everyday Philippine weather decision assistant.\n\nSubukan magtanong tungkol sa:\n• **Current weather & Heat Index** sa inyong lugar\n• **7-Day Rain & Thunderstorm** forecast\n• **Travel Safety & Flood Risk** advisory\n• **Side-by-Side Comparison** ng dalawang probinsya/cities`,
+      followUps: [
+        `Weather ngayon sa ${selectedRegion || 'NCR'}?`,
+        `Uulan ba sa ${selectedRegion || 'Cebu'}?`,
+        `Heat index at init sa ${selectedRegion || 'Maynila'}?`,
+        `Safe ba mag-travel ngayon?`,
+      ],
     },
   ]);
   const [input, setInput] = useState('');
@@ -939,11 +1165,25 @@ export function WeatherChatbot({ selectedRegion }: { selectedRegion: string }) {
 
     try {
       const response = await generateBotResponse(msg, selectedRegion);
-      setMessages((prev) => [...prev, { role: 'bot', text: response }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'bot',
+          text: response.text,
+          followUps: response.followUps,
+        },
+      ]);
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: 'bot', text: 'Ay naku, may error sa pag-connect! Try mo ulit, tol.' },
+        {
+          role: 'bot',
+          text: 'Ay naku, may error sa pag-connect! Try mo ulit, tol.',
+          followUps: [
+            `Weather ngayon sa ${selectedRegion}`,
+            `Uulan ba mamaya?`,
+          ],
+        },
       ]);
     } finally {
       setLoading(false);
@@ -985,41 +1225,56 @@ export function WeatherChatbot({ selectedRegion }: { selectedRegion: string }) {
 
           <div className="chatbot-messages" role="log" aria-live="polite">
             {messages.map((msg, i) => (
-              <div key={i} className={`chatbot-msg ${msg.role}`}>
-                <div className="msg-label" aria-hidden="true">
-                  {msg.role === 'bot' ? (
-                    <>
-                      <BotIcon size={13} color="var(--accent)" />
-                      <span>Kuya Weather</span>
-                    </>
-                  ) : (
-                    <>
-                      <UserIcon size={13} color="currentColor" />
-                      <span>You</span>
-                    </>
-                  )}
+              <div key={i} className={`chatbot-msg-wrapper ${msg.role}`}>
+                <div className={`chatbot-msg ${msg.role}`}>
+                  <div className="msg-label" aria-hidden="true">
+                    {msg.role === 'bot' ? (
+                      <>
+                        <BotIcon size={13} color="var(--accent)" />
+                        <span>Kuya Weather</span>
+                      </>
+                    ) : (
+                      <>
+                        <UserIcon size={13} color="currentColor" />
+                        <span>You</span>
+                      </>
+                    )}
+                  </div>
+                  <div className="msg-content">
+                    {msg.text.split('\n').map((line, j) => (
+                      <div key={j} className="msg-line-wrapper">
+                        {renderRichMessageLine(line, `${i}-${j}`)}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                {msg.text.split('\n').map((line, j) => {
-                  // Parse bold **text** into <strong> elements
-                  const parts = line.split(/\*\*(.+?)\*\*/g);
-                  const rendered = parts.map((part, k) =>
-                    k % 2 === 1
-                      ? <strong key={k}>{part}</strong>
-                      : <span key={k}>{part}</span>
-                  );
-                  // Render separator lines as <hr>
-                  if (line.match(/^[─]{3,}$/)) {
-                    return <hr key={j} className="msg-divider" />;
-                  }
-                  return (
-                    <span key={j} className={line.startsWith('  ') ? 'msg-indent' : ''}>
-                      {rendered}
-                      {j < msg.text.split('\n').length - 1 && <br />}
+
+                {/* Contextual Follow-Up Questions (Rendered on Bot Answers) */}
+                {msg.role === 'bot' && msg.followUps && msg.followUps.length > 0 && i === messages.length - 1 && (
+                  <div className="msg-follow-ups" role="group" aria-label="Suggested follow-up questions">
+                    <span className="follow-up-caption">
+                      <SparklesIcon size={11} color="var(--accent)" />
+                      <span>Suggested Follow-up Questions:</span>
                     </span>
-                  );
-                })}
+                    <div className="follow-up-chips">
+                      {msg.followUps.map((q, idx) => (
+                        <button
+                          key={idx}
+                          className="follow-up-chip"
+                          onClick={() => handleSend(q)}
+                          type="button"
+                          disabled={loading}
+                          title={`Ask: "${q}"`}
+                        >
+                          <span>{q}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
+
             {loading && (
               <div className="chatbot-typing">
                 <span className="typing-dot" />
@@ -1029,14 +1284,6 @@ export function WeatherChatbot({ selectedRegion }: { selectedRegion: string }) {
               </div>
             )}
             <div ref={messagesEndRef} />
-          </div>
-
-          <div className="chatbot-suggestions">
-            {messages.length <= 2 && SUGGESTIONS.map((s, i) => (
-              <button key={i} onClick={() => handleSend(s)} type="button">
-                {s}
-              </button>
-            ))}
           </div>
 
           <div className="chatbot-input-row">
