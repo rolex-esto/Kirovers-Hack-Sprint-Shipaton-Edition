@@ -9,6 +9,8 @@ import {
   MapPinIcon,
   CheckCircleIcon,
   AlertCircleIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
 } from '../Icons';
 
 interface WeatherStatusPanelProps {
@@ -28,11 +30,12 @@ export function WeatherStatusPanel({
   isForecastMode,
   viewMode,
 }: WeatherStatusPanelProps) {
+  const [isMinimized, setIsMinimized] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
   const exp = deriveExperienceReport(simState);
 
   return (
-    <div className="weather-reality-status-panel">
+    <div className={`weather-reality-status-panel ${isMinimized ? 'minimized' : ''}`}>
       {/* Location & Mode Badge */}
       <div className="status-panel-header">
         <div className="location-row">
@@ -40,24 +43,56 @@ export function WeatherStatusPanel({
             <MapPinIcon size={14} color="var(--accent)" />
             <span className="location-name">{locationName}</span>
           </div>
-          <span className={`status-pill ${isForecastMode ? 'forecast' : 'live'}`}>
-            <span className="status-dot" />
-            {isForecastMode ? `Forecast (${simState.formattedTime})` : 'Live Weather'}
-          </span>
+          <div className="panel-header-actions">
+            <span className={`status-pill ${isForecastMode ? 'forecast' : 'live'}`}>
+              <span className="status-dot" />
+              {isForecastMode ? `Forecast (${simState.formattedTime})` : 'Live Weather'}
+            </span>
+            <button
+              type="button"
+              className="panel-collapse-btn"
+              onClick={() => setIsMinimized(!isMinimized)}
+              aria-label={isMinimized ? 'Expand weather details' : 'Minimize weather details'}
+              title={isMinimized ? 'Expand weather details' : 'Minimize weather details'}
+            >
+              {isMinimized ? <ChevronDownIcon size={15} /> : <ChevronUpIcon size={15} />}
+            </button>
+          </div>
         </div>
-        <div className="coords-badge">
-          {lat.toFixed(4)}° N, {lon.toFixed(4)}° E &bull; {viewMode === 'street' ? 'Real Street View' : viewMode === 'map' ? 'Satellite / Map' : 'Split View'}
-        </div>
-        <h3 className="condition-title">{simState.weatherCondition}</h3>
+
+        {isMinimized ? (
+          <div
+            className="minimized-summary"
+            onClick={() => setIsMinimized(false)}
+            role="button"
+            tabIndex={0}
+            title="Click to view full weather details"
+          >
+            <div className="minimized-condition-badge">
+              <span className="minimized-condition">{simState.weatherCondition}</span>
+              <span className="minimized-temp">{simState.temperatureC}°C</span>
+            </div>
+            <span className="minimized-hint">Tap for details ▾</span>
+          </div>
+        ) : (
+          <>
+            <div className="coords-badge">
+              {lat.toFixed(4)}° N, {lon.toFixed(4)}° E &bull; {viewMode === 'street' ? 'Real Street View' : viewMode === 'map' ? 'Satellite / Map' : 'Split View'}
+            </div>
+            <h3 className="condition-title">{simState.weatherCondition}</h3>
+          </>
+        )}
       </div>
 
-      {/* Primary Telemetry Grid */}
-      <div className="telemetry-grid">
-        <div className="telemetry-item">
-          <div className="telemetry-label">
-            <ThermometerIcon size={13} color="var(--accent)" />
-            <span>Temp</span>
-          </div>
+      {!isMinimized && (
+        <div className="status-panel-body">
+          {/* Primary Telemetry Grid */}
+          <div className="telemetry-grid">
+            <div className="telemetry-item">
+              <div className="telemetry-label">
+                <ThermometerIcon size={13} color="var(--accent)" />
+                <span>Temp</span>
+              </div>
           <div className="telemetry-val">{simState.temperatureC}°C</div>
           <span className="telemetry-sub">Feels {simState.apparentTempC}°C</span>
         </div>
@@ -185,5 +220,9 @@ export function WeatherStatusPanel({
         )}
       </div>
     </div>
+      )}
+    </div>
   );
 }
+
+

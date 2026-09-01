@@ -507,14 +507,90 @@
   left: 1rem;
   width: 320px;
   max-width: calc(100% - 2rem);
-  background: rgba(15, 23, 42, 0.90);
+  background: rgba(15, 23, 42, 0.92);
   backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   padding: 1rem;
   color: #ffffff;
   z-index: 20;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.weather-reality-status-panel.minimized {
+  padding: 0.55rem 0.75rem;
+  gap: 0.35rem;
+  width: auto;
+  min-width: 260px;
+  background: rgba(15, 23, 42, 0.88);
+}
+
+.panel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.panel-collapse-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #e2e8f0;
+  padding: 0.2rem 0.35rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.panel-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.minimized-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding-top: 0.15rem;
+  user-select: none;
+}
+
+.minimized-condition-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.minimized-condition {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.minimized-temp {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
+.minimized-hint {
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.status-panel-body {
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
@@ -885,4 +961,317 @@
   align-items: center;
   gap: 0.3rem;
 }
+
+/* ============================================
+   RESPONSIVE MEDIA QUERIES
+   ============================================ */
+
+@media (max-width: 768px) {
+  .weather-reality-card {
+    padding: 0.85rem;
+    gap: 0.75rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+  }
+
+  .weather-reality-card.fullscreen-mode {
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    border-radius: 0;
+    padding: 0.75rem;
+  }
+
+  .weather-reality-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+
+  .main-title {
+    font-size: 1.15rem;
+  }
+
+  .subtitle {
+    font-size: 0.8rem;
+  }
+
+  .header-controls {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .view-mode-selector {
+    flex: 1;
+    display: flex;
+  }
+
+  .view-mode-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 0.35rem 0.35rem;
+    font-size: 0.72rem;
+  }
+
+  .overlay-toggle-btn {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+
+  .expand-btn {
+    padding: 0.35rem 0.5rem;
+  }
+
+  .simulation-stage {
+    height: 460px;
+  }
+
+  .simulation-stage.view-mode-split {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+    height: 560px;
+  }
+
+  .landmark-chips-bar {
+    padding: 0.3rem 0.5rem;
+    gap: 0.4rem;
+  }
+
+  .landmark-bar-label {
+    font-size: 0.7rem;
+  }
+
+  .landmark-chip {
+    padding: 0.25rem 0.55rem;
+    font-size: 0.7rem;
+    min-height: 28px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .weather-reality-status-panel {
+    top: 0.5rem;
+    left: 0.5rem;
+    right: 0.5rem;
+    width: auto;
+    max-width: none;
+    max-height: calc(100% - 1rem);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.75rem;
+    gap: 0.5rem;
+    border-radius: 10px;
+  }
+
+  .weather-reality-status-panel.minimized {
+    right: auto;
+    max-width: calc(100% - 1rem);
+    width: auto;
+    min-width: 0;
+  }
+
+  .telemetry-grid {
+    gap: 0.35rem;
+  }
+
+  .telemetry-item {
+    padding: 0.35rem 0.45rem;
+  }
+
+  .telemetry-val {
+    font-size: 0.88rem;
+  }
+
+  .experience-section {
+    padding: 0.45rem;
+  }
+
+  .streetview-pan-controls {
+    top: auto;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    padding: 0.2rem;
+    gap: 0.2rem;
+  }
+
+  .pan-btn {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.35rem;
+  }
+
+  .streetview-external-badge {
+    bottom: 0.5rem;
+    left: 0.5rem;
+    right: auto;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.45rem;
+  }
+
+  .map-toolbar {
+    top: auto;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    gap: 0.3rem;
+  }
+
+  .map-tool-btn {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.68rem;
+  }
+
+  .map-tool-btn.radar-btn {
+    padding: 0.2rem 0.45rem;
+  }
+
+  .timeline-node {
+    min-width: 60px;
+    padding: 0.4rem 0.45rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .weather-reality-card {
+    padding: 0.65rem;
+    gap: 0.6rem;
+    border-radius: 10px;
+  }
+
+  .main-title {
+    font-size: 1.05rem;
+  }
+
+  .subtitle {
+    font-size: 0.75rem;
+  }
+
+  .header-controls {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .view-mode-selector {
+    width: 100%;
+    order: 1;
+  }
+
+  .overlay-toggle-btn {
+    flex: 1;
+    text-align: center;
+    order: 2;
+  }
+
+  .expand-btn,
+  .close-modal-btn {
+    order: 3;
+  }
+
+  .simulation-stage {
+    height: 400px;
+  }
+
+  .simulation-stage.view-mode-split {
+    height: 500px;
+  }
+
+  .landmark-chips-bar {
+    padding: 0.25rem 0.45rem;
+  }
+
+  .landmark-bar-label span {
+    font-size: 0.68rem;
+  }
+
+  .landmark-chip {
+    font-size: 0.68rem;
+    padding: 0.2rem 0.45rem;
+  }
+
+  .weather-reality-status-panel {
+    top: 0.4rem;
+    left: 0.4rem;
+    right: 0.4rem;
+    padding: 0.65rem;
+  }
+
+  .weather-reality-status-panel.minimized {
+    top: 0.4rem;
+    left: 0.4rem;
+    right: 0.4rem;
+  }
+
+  .location-name {
+    font-size: 0.82rem;
+  }
+
+  .status-pill {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.35rem;
+  }
+
+  .condition-title {
+    font-size: 1rem;
+  }
+
+  .telemetry-val {
+    font-size: 0.82rem;
+  }
+
+  .telemetry-sub {
+    font-size: 0.6rem;
+  }
+
+  .exp-row {
+    font-size: 0.68rem;
+  }
+
+  .simulation-disclaimer {
+    font-size: 0.62rem;
+  }
+
+  .pan-btn span {
+    font-size: 0.62rem;
+  }
+
+  .streetview-external-badge span {
+    display: none;
+  }
+
+  .streetview-external-badge {
+    padding: 0.25rem 0.35rem;
+  }
+
+  .timeline-title {
+    font-size: 0.8rem;
+  }
+
+  .live-reset-btn {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.4rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .view-mode-btn span {
+    font-size: 0.68rem;
+  }
+
+  .landmark-bar-label span {
+    display: none; /* Icon only on extra small screens */
+  }
+
+  .simulation-stage {
+    height: 360px;
+  }
+
+  .telemetry-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem;
+  }
+}
+
 
